@@ -535,10 +535,10 @@ class Provider:
         #   - pypiwin32 (219); sys_platform == "win32" and python_version < "3.6"
         duplicates = dict()
         for dep in dependencies:
-            if dep.name not in duplicates:
-                duplicates[dep.name] = []
+            if dep.complete_name not in duplicates:
+                duplicates[dep.complete_name] = []
 
-            duplicates[dep.name].append(dep)
+            duplicates[dep.complete_name].append(dep)
 
         dependencies = []
         for dep_name, deps in duplicates.items():
@@ -699,7 +699,12 @@ class Provider:
 
             clean_dependencies.append(dep)
 
-        package.requires = clean_dependencies
+        package = DependencyPackage(
+            package.dependency, package.with_dependency_groups([], only=True)
+        )
+
+        for dep in clean_dependencies:
+            package.add_dependency(dep)
 
         return package
 

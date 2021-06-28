@@ -334,13 +334,13 @@ def _configure_run_install_dev(locker, repo, package, installed):
 
     package.add_dependency(Factory.create_dependency("A", "~1.0"))
     package.add_dependency(Factory.create_dependency("B", "~1.1"))
-    package.add_dependency(Factory.create_dependency("C", "~1.2", category="dev"))
+    package.add_dependency(Factory.create_dependency("C", "~1.2", groups=["dev"]))
 
 
-def test_run_install_no_dev(installer, locker, repo, package, installed):
+def test_run_install_no_group(installer, locker, repo, package, installed):
     _configure_run_install_dev(locker, repo, package, installed)
 
-    installer.dev_mode(False)
+    installer.with_groups(["dev"])
     installer.run()
 
     assert 0 == installer.executor.installations_count
@@ -348,27 +348,15 @@ def test_run_install_no_dev(installer, locker, repo, package, installed):
     assert 1 == installer.executor.removals_count
 
 
-def test_run_install_dev_only(installer, locker, repo, package, installed):
+def test_run_install_group_only(installer, locker, repo, package, installed):
     _configure_run_install_dev(locker, repo, package, installed)
 
-    installer.dev_only(True)
+    installer.only_groups(["dev"])
     installer.run()
 
     assert 0 == installer.executor.installations_count
     assert 0 == installer.executor.updates_count
     assert 2 == installer.executor.removals_count
-
-
-def test_run_install_no_dev_and_dev_only(installer, locker, repo, package, installed):
-    _configure_run_install_dev(locker, repo, package, installed)
-
-    installer.dev_mode(False)
-    installer.dev_only(True)
-    installer.run()
-
-    assert 0 == installer.executor.installations_count
-    assert 0 == installer.executor.updates_count
-    assert 1 == installer.executor.removals_count
 
 
 @pytest.mark.parametrize(
@@ -439,7 +427,7 @@ def test_run_install_remove_untracked(
         }
     )
 
-    installer.dev_mode(True).remove_untracked(True)
+    installer.remove_untracked(True)
     installer.run()
 
     assert 0 == installer.executor.installations_count
